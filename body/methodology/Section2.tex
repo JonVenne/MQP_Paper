@@ -20,7 +20,7 @@ Assuming a state space with n parameters, each of these is a matrix with dimensi
 Given the appropriate values of Q and R, the KF acts as an optimal estimator as it minimizes the Mean Square Error (MSE) of the predicted x. In practice, this can be thought of as nearly equivalent to a recursive weighted least squares (WLS) estimate where Q acts as the forgetting factor for the KF as lambda does in WLS. 
 
 \subsection{Our Application of the Kalman Filter}
-Normally, the Kalman Filter is used smooth out noise while maintaining the general form of the original data. As seen in Figure 3.1, the KF takes the set of noisy observations and it able to reconstruct a good approximation of the true function's behavior.
+Normally, the Kalman Filter is used to smooth out noise while maintaining the general form of the original data. As seen in Figure 3.1, the KF takes the set of noisy observations and is able to reconstruct a good approximation of the true function's behavior.
 
 \begin{figure}[h]
 \centering
@@ -28,17 +28,13 @@ Normally, the Kalman Filter is used smooth out noise while maintaining the gener
 \caption{Temperary Kalman Filter Picture}
 \end{figure}
 
-This traditional usage of the KF iteratively predicts each point value  producing a far less noisy approximation of the true function. We chose to instead use it to approximate the parameters to a function that best fits the trends in the data and from those parameters, forecast for what the value should be in the future. Figure 3.2 shows an example of a line whose parameters were derived using this formulation of the KF.
-
-\begin{figure}[h]
-\centering
-\includegraphics{body/methodology/example_line.jpg}
-\caption{Temp linear Kalman Filter line prediciton}
-\end{figure}
+ We chose to instead use it to approximate the parameters to a function that best fits the data and from those parameters, forecast what the value should be in the future. Our implementation is as follows:
 
 We will assume we have some set of noisy linear data in the form (time, value) such that we want to find the best linear approximation of the form 
 
-\begin{equation} Value = \hat{B_{0}} + \hat{B_{1}}*time  \end{equation}
+\begin{equation} 
+Value = \hat{B_{0}} + \hat{B_{1}}*time  
+\end{equation}
 
 that fits this data. We start with an initial state space estimate of $x_{0|0}$, error covariance matrix estimate $P_{0|0}$ and chosen values of Q and R.
 
@@ -77,9 +73,24 @@ that fits this data. We start with an initial state space estimate of $x_{0|0}$,
   \end{align}
   \end{subequations}
   
-  This is a simplification as we know the true function is not constant. However, by assuming so, we aim to accurately capture the general trend of the data with the goal of producing rather rough forecasting predictions. P represents the confidence (or variability) of each parameter in the current state space with larger values of P meaning less confidence in \hat{x}. From Equ. 3.5b we can see that providing a larger Q causes consistently larger estimates of P. This makes sense as Q is a measure of the variability in each parameter of x, so larger Q's should cause the KF to be less confident in it's predictions.
+  This is a simplification as we know the true function is not constant. This changes the filter from dynamic to a static model approximation. P represents the confidence in (or variability of) each parameter in the current state space with larger values of P meaning less confidence in \hat{x}. From Equ. 3.5b we can see that providing a larger Q causes consistently larger estimates of P. This makes sense as Q is a measure of the variability in each parameter of x, so larger Q's should cause the KF to be less confident in it's predictions.
   
-  The second step is updating. Each iteration of the KF utilizes a single data point, so the k$^{th}$ iteration with use the point (Time$_{k}$, Value$_{k}$). We begin by calculating the residual (or error from the k$^{th}$ known observation) for (Time$_{k}$, Value$_{k}$).
+  As a further simplification, we assumed P and Q to be 0 in the off diagonal. This means we assume that the parameters B$_{0}$ and B$_{1}$ exist and change independently
+  
+    \centering
+    P$_{k}$ &= \begin{bmatrix}
+           P_{B_{0}}&0 \\
+           0&P_{B_{1}}
+         \end{bmatrix}
+         
+    Q &= \begin{bmatrix}
+        Q_{B_{0}}&0 \\
+        0&Q_{B_{1}}
+        \end{bmatrix}
+  
+  where  P$_{B_{0}}$,  P$_{B_{1}}$, Q$_{B_{0}}$, and Q$_{B_{1}}$ can be any positive numbers.
+  
+  The second step is updating. Each iteration of the KF utilizes a single data point, so the k$^{th}$ iteration will use the point (Time$_{k}$, Value$_{k}$). We begin by calculating the residual (or error from the k$^{th}$ known observation) for (Time$_{k}$, Value$_{k}$).
   
   \begin{equation}
   \centering
@@ -103,9 +114,89 @@ H_{k}\hat{x}_{k+1|k} = B_{0}*1 + B_{1}*Time_{k}
   
   Thus, the y$_{k}$ is simply the difference between the prediction of Value$_{k}$ at Time$_{k}$ and the actual observed Value$_{k}$ at Time$_{k}$.
   
-  We then perform the innovation step where we calculate S$_{k}$. S$_{k}$ can be understood as a metric for the confidence in observation z$_{k}$ as it represents the variability of all observations thus far. If the values of z tend to vary greatly, S$_{k}$ will increase. If the values of z vary by only small amount, S$_{k}$ will be small.
+  We then perform the innovation step where we calculate S$_{k}$. S$_{k}$ can be understood as a metric for the confidence in observation z$_{k}$ as it represents the variability of z$_{1}$, \cdots , z$_{k}$. If the values of z tend to vary greatly, S$_{k}$ be large. If the values of z vary by only small amount, S$_{k}$ will also be small. Larger values of R also cause larger values of S$_{k}$ since R is a measure of the variability for all observations.
   
   \begin{equation}
   \centering
 s_{k} = R + H_{k}P_{k|k-1}H_{k}^{T}
   \end{equation}
+  
+  P, H, and s come together to form K$_{k}$, the Kalman gain. Kalman gain can be thought of as a “velocity factor” for the KF controlling the magnitude of adjustment to make to the current x$_{k}$. The formula for the optimal gain, meaning it minimizes the mean square error, is  
+  
+    \begin{equation}
+  \centering
+K_{k} = P_{k|k-1}H_{k}^{T}s_{k}^{-1}
+  \end{equation}
+  
+  From this we can see that as P$_{k}$ gets small, so too does K$_{k}$. This is because a large P$_{k}$ implies low confidence (or high variability) in x$_{k}$. Thus, having high confidence in the current state should yield only a small change to the new predicted x$_{k}$. We can also see that as s$_{k}$ gets large K$_{k}$ gets small. This also makes sense since large s$_{k}$ implies low observation confidence (or high observation variability). In that case we'd want a smaller state adjustment for larger prediction errors as we don't trust the  current observation as true (that is we want our state adjustment to be less sensitive to erroneous predictions).
+  
+  We then improve the current state space estimate using information from the k$^{th}$ iteration thus shifting $\hat{x}_{k|k-1}$ to $\hat{x}_{k|k}$
+  
+      \begin{subequations}
+      \begin{align}
+    \Delta\hat{x}_{k} = K_{k}y_{k} \\
+    \hat{x}_{k|k} = \hat{x}_{k|k-1} + \Delta\hat{x}_{k}
+    \end{align}
+  \end{subequations}
+
+From Equ. 3.11a we see that $y_{k}$ controls the sign of the state prediction adjustment. When z$_{k}$ < H$_{k}$X$_{k|k-1}$, y$_{k}$ < 0 making $\Delta\hat{x}_{k}$ negative. We can also see that the magnitude of y$_{k}$ and K$_{k}$ controls the magnitude of $\Delta\hat{x}_{k}$.
+
+We perform the same improvement for P, changing P$_{k|k-1}$ to P$_{k|k}$ by
+
+\begin{equation} 
+\centering
+P_{k|k} = (I - K_{k}H_{k})P_{k|k-1}(I - K_{k}H_{k})^{T} + K_{k}RK_{k}^{T}
+\end{equation}
+
+where I is the 2-by-2 identity matrix. When using the optimal Kalman gain, as we do, this calculation can be reduced to 
+
+\begin{equation} 
+\centering
+P_{k|k} = (I - K_{k}H_{k})P_{k|k-1}
+\end{equation}
+
+Each iteration k will use the previous iterations estimates of $\hat{x}_{k-1|k-1}$ and P$_{k-1|k-1}$ as the new starting guess for $\hat{x}$ and P while maintaining the same Q and R throughout. Once completed for all data points, the final $\hat{x}_{k|k}$ is treated as the model prediction. We can then use those values of B$_{0}$ and B$_{1}$ to forecast what the value will be for some time after the last data point. The nature of the KF allows this data to be processed in any order. Since our data comes in chronilogically and is monotonically increasing over the entire domain, the use of the forgetting Q allows us to essentially weight the later data points more heavily. This is effectively equivalent to performing a WLS fit
+
+Figure 3.2 shows an example of a line whose parameters were found using the KF with an all zero Q along side the same contest fit with a line by ordinary least squares. Both approaches predict virtually the same line. However, if Q is changed such that Q$_{B_{0}}$ = 0.3  instead of 0 as in figure 3.3, we can see the behavior change significantly.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8cm]{body/methodology/KF_Q0.png}
+\includegraphics[width=8cm]{body/methodology/LS_pred.png}
+\caption{Temp linear KF Q=0/ LS predicitons Lam=1}
+\end{figure}
+
+Performing the fit by KF can be convenient for time series data as each iteration involves processing only one data point at a time. And while least squares is not very computationally intensive, it still requires redoing the entire dataset calculation when updating the parameters.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=10cm]{body/methodology/KF_Q3.png}
+\caption{Temp lin KF Q=0.3}
+\end{figure}
+
+While the KF is an excellent method for estimating model parameters it is limited in the same way as LS in that it can only predict for linear models. But, by simply changing the H$_{k}$ we can convert the KF into the Extended Kalman Filter (EKF) which works for non-linear functions. Let M(t) be the model function and B$_{1} \cdots$ B$_{i}$ be all the state space parameters of x. Then H$_{k}$ will be
+
+\begin{equation}
+\centering
+H_{k} &= \begin{bmatrix}
+           {\frac{\partial M(t)}{\partial B_{1}}&\cdots&\frac{\partial M(t)}{\partial B_{i}}
+         \end{bmatrix}
+\end{equation}
+
+In our case, we assume M(t) to be of the form $B_{0}e^{B_{1}t}$. Thus H$_{k}$ is
+
+\begin{equation}
+\centering
+H_{k} &= \begin{bmatrix}
+           e^{B_{1}t}&B_{1}B_{0}e^{B_{1}t}
+         \end{bmatrix}
+\end{equation}
+
+Other than that, the rest of the calculation are exactly the same as for the ordinary Kalman filter. Figure 3.4 shows some predictions by using the extended Kalman Filter. It should be noted that the only difference is one has all 0's for Q and the other has 10's on the main diagonal. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8cm]{body/methodology/KF_True0.png}
+\includegraphics[width=8cm]{body/methodology/KF_True10.png}
+\caption{Temp EKF Q=0/ EKF Q=10}
+\end{figure}
