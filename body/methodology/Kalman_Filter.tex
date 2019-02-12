@@ -75,10 +75,9 @@ that fits this data. We start with an initial state space estimate of $x_{0|0}$,
   
   This is a simplification as we know the true function is not constant. This changes the filter from dynamic to a static model approximation. P represents the confidence in (or variability of) each parameter in the current state space with larger values of P meaning less confidence in \hat{x}. From Equ. 3.5b we can see that providing a larger Q causes consistently larger estimates of P. This makes sense as Q is a measure of the variability in each parameter of x, so larger Q's should cause the KF to be less confident in it's predictions.
   
-  As a further simplification, we assumed P and Q to be 0 in the off diagonal. This means we assume that the parameters B$_{0}$ and B$_{1}$ exist and change independently
-  
-    \centering
-    P$_{k}$ &= \begin{bmatrix}
+  As a further simplification, we assumed P and Q to be 0 in the off diagonal. This means we assume that the parameters B$_{0}$ and B$_{1}$ exist and change independently where  P$_{B_{0}}$,  P$_{B_{1}}$, Q$_{B_{0}}$, and Q$_{B_{1}}$ can be any positive numbers.
+    \[
+    P_{k} &= \begin{bmatrix}
            P_{B_{0}}&0 \\
            0&P_{B_{1}}
          \end{bmatrix}
@@ -87,9 +86,7 @@ that fits this data. We start with an initial state space estimate of $x_{0|0}$,
         Q_{B_{0}}&0 \\
         0&Q_{B_{1}}
         \end{bmatrix}
-  
-  where  P$_{B_{0}}$,  P$_{B_{1}}$, Q$_{B_{0}}$, and Q$_{B_{1}}$ can be any positive numbers.
-  
+  \]
   The second step is updating. Each iteration of the KF utilizes a single data point, so the k$^{th}$ iteration will use the point (Time$_{k}$, Value$_{k}$). We begin by calculating the residual (or error from the k$^{th}$ known observation) for (Time$_{k}$, Value$_{k}$).
   
   \begin{equation}
@@ -174,7 +171,9 @@ Performing the fit by KF can be convenient for time series data as each iteratio
 \caption{Temp lin KF Q=0.3}
 \end{figure}
 
-While the KF is an excellent method for estimating model parameters it is limited in the same way as LS in that it can only predict for linear models. But, by simply changing the H$_{k}$ we can convert the KF into the Extended Kalman Filter (EKF) which works for non-linear functions. Let M(t) be the model function and B$_{1} \cdots$ B$_{i}$ be all the state space parameters of x. Then H$_{k}$ will be
+\subsection{Extended Kalman Filter}
+
+While the KF is an excellent method for estimating model parameters, it is limited in the same way as LS in that it can only predict for linear models. This will work for estimating on logged data, however, we'd prefer to be able to directly estimate the parameters of the non-linear exponential function M(t) = $B_{0}e^{B_{1}t}$. To do this, we turn to the Extended Kalman Filter (EKF). The EKF works exactly the same as the normal KF except it can work with non-linear model functions. The only difference between the KF and EKF for our purposes is the values of H$_{k}$. For the EKF, H$_{k}$ takes the form
 
 \begin{equation}
 \centering
@@ -183,7 +182,7 @@ H_{k} &= \begin{bmatrix}
          \end{bmatrix}
 \end{equation}
 
-In our case, we assume M(t) to be of the form $B_{0}e^{B_{1}t}$. Thus H$_{k}$ is
+where B$_{0}$ \cdots B$_{i}$ are the values of the state space \hat{x}. In our case, we assume M(t) = $B_{0}e^{B_{1}t}$, thus
 
 \begin{equation}
 \centering
@@ -192,7 +191,7 @@ H_{k} &= \begin{bmatrix}
          \end{bmatrix}
 \end{equation}
 
-Other than that, the rest of the calculation are exactly the same as for the ordinary Kalman filter. Figure 3.4 shows some predictions by using the extended Kalman Filter. It should be noted that the only difference is one has all 0's for Q and the other has 10's on the main diagonal. 
+Other the calculations are exactly the same as for the ordinary Kalman filter. Figure 3.4 shows some exponential model predictions using the extended Kalman Filter. R = 30 for both, but the left one has all 0's for Q while the right one has 10's on the main diagonal of Q. 
 
 \begin{figure}[h]
 \centering
