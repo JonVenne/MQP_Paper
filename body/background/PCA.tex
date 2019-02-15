@@ -1,0 +1,41 @@
+\usepackage{amsmath}
+\section{Background Section 4}
+
+Principal Component Analysis (PCA) is a typical strategy for dimension reduction in data science. In data with hundreds or even thousands of factors, there is a strong possibility that only a few of those factors are necessary to predict the response variable with some accuracy. PCA relies on Singular Value Decomposition and requires that data from each column has non-zero variance. First, in this section we explore the main concepts of PCA and Singular Value Decomposition, then discuss our implementation of PCA on the Contest data.\newline
+
+\subsection{Principles of PCA}
+
+Within a large data set with n observations of p predictors, each variable may or may not be correlated with any other, opening the possibility that only a few variables are necessary to predict the response. These few variables would be uncorrelated and account for the greatest possible amount of variance within the data. In fact, PCA uses possible linear combinations of predictors to create its principal components. Here a linear combination might be .2 times the column $X_{1}$ plus .8 times the column $X_{2}$. PCA has some parallels to linear regression, although PCA is unsupervised - meaning that the algorithm does not receive the response variable - whereas linear regression is supervised - meaning that the algorithm does receive the response variable. In each, a linear separator can be drawn to minimize distance between itself and the data points. For regression, along the y-axis falls the response variable and along the x-axis a predictor, while error in the prediction is measured vertically between data points and the y-value of the linear predictor at that point. Meanwhile, PCA compares two or more principal components along each axis, attempts to provide a linear separator, and measures error with Euclidean distance from the data point to the line. Further details on this process are to follow. 
+
+\subsection{Singular Value Decomposition}
+
+The lynchpin to utilizing Principal Component Analysis is the use of Singular Value Decomposition. Considering the dataset with n observations of m predictors, we can create a real valued matrix of size \textit{mxn}. This matrix can then be factored using SVD, and information from that factorization is used to select principal components. In our dataset sized \textit{mxn}, let’s call it M, we can write
+\newline
+
+\begin{equation}
+M=U \Sigma V^{T}
+\end{equation}
+
+Here, U is a unitary matrix of size \textit{mxm}. Unitary matrices are matrices for which their product with their transpose is equal to the identity matrix, namely,
+
+\begin{equation}
+U U^{T} = U^{T} U = I_{m} 
+\end{equation}
+
+Our $\Sigma$  here is a \textit{mxn} diagonal matrix. A diagonal matrix has entries only along its diagonal, with all other entries being equal to 0. We write
+
+\[
+\Sigma 
+= 
+\begin{bmatrix}
+    \sigma_{1} & 0 & 0 & \dots & 0 \\
+    0 & \sigma_{2} & 0 & \dots & 0 \\
+    0 & 0 & \sigma_{3} & \dots & 0 \\
+    \vdots & \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & 0 & \dots & \sigma_{n}
+\end{bmatrix}
+
+\]
+
+where $\sigma_{1}$ is the first singular value of the matrix M and all σ values take on only positive values representative of the amount of variance explained by each principal component. Here, $\sigma_{1}$ represents the variance explained by the first principal component, $\sigma_{2}$ the variance explained by the second, and so forth. Finally, our matrix $V^{T}$ is another unitary matrix of size \textit{nxn}. Their product makes up the complete factorization of the original matrix M. The unitary nature of U and $V^{T}$ are what make their columns orthogonal. These columns then form an orthogonal basis of the vector space size m and n respectively. 
+
