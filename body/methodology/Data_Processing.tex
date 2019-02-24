@@ -1,1 +1,120 @@
-\section{Data Processing}
+\subsubsection{Data Processing}
+
+The total data cleaning and classification occurred over 5 major steps:
+
+\begin{itemize}
+  \item Time Series Data Processing
+  \item Exponential Model Fitting
+  \item Final Data Set Setup
+  \item Classification Prediction
+  \item Performance Evaluation
+\end{itemize}
+
+\section{Time Series Data Processing}
+
+\subsection{Data Chunking}
+
+In its original format, the time series data was organized by month. This meant that a single contest could have its data split into multiple files. Knowing that this organization would involve extra load time for processing contests, we split the time series data into chunks based on each series' id. Each chunk consists of approximately 10,000 contests, and were saved with a naming scheme ``chunkNN.csv'' where NN is a positive natural number. In total, we ended with 65 chunks of data. Since previously the data was organized by month, there were some contests that started in one month and ended in another, thus they were split across multiple files. We made sure that each chunk contained all data for each contest in it making future processing easier. We also created a chunk map csv that lists the chunk each contest is in for future ease of locating data.
+
+\subsection{Data Fixing}
+
+The original data had columns for ``minutes remaining in contest'' and ``number of entries received in that minute'' as shown in Table 3.1. For our purposes, we preferred to instead have the data in the form of ``minutes since contest opened'' and ``total number of entries since contest opened''. To do this, we performed a cumulative summation in chronological order over the number of entries at each minute. 
+
+\begin{table}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+ \textbf{Contest ID} & \textbf{Minutes Remaining} & \textbf{Entries} \\ 
+ \hline
+ 10486 & 400 & 2 \\  
+ \hline
+ 10486 & 395 & 1 \\
+ \hline
+ 10486 & 394 & 3 \\
+ \hline
+ \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 210 & 5 \\
+ \hline
+ \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 0 & 4 \\
+ \hline
+\end{tabular}
+\caption{Original Form of Time Series Data}
+\end{center}
+\end{table}
+
+We also converted the time, calculating the ``Time Since Start'' value by subtracting the current minutes remaining from the maximum minutes remaining. This simply inverts the numbering so time starts from 0 and increases until the contest closes. We also added a boolean column for each point to tell whether that point occurs in the last 240 minutes (4 hours) of the contest or not. A value of 1 means the point occrus before 4 hours remaining (Time Remaining $>$ 240), 0 otherwise.This is to help later when we forecast future values using only data up to four hours from the contest close as if we are actually trying to predict the result in advance. In the end, the structure for each contest is changed from what's seen in Table 3.1 to something more like Table 3.2.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+ \textbf{Contest ID} & \textbf{Minutes Since Start} & \textbf{Summed Entries} & \textbf{4 Hours Out} \\ 
+ \hline
+ 10486 & 0 & 2 & 1 \\  
+ \hline
+ 10486 & 5 & 3 & 1 \\
+ \hline
+ 10486 & 6 & 6 & 1 \\
+ \hline
+ \vdots & \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 190 & 60 & 0 \\
+ \hline
+ \vdots & \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 400 & 310 & 0 \\
+ \hline
+\end{tabular}
+\caption{Converted Time Series Data}
+\end{center}
+\end{table}
+
+Additionally, we go through each contest and scale all the Time and Entries data to 1 by dividing each point by its respective max value. This is so when we later fit exponential models to the data, the models are all on the same range of values holding the prediction consistent across contests of varying sizes.  The final scaled values from Table 3.2 can be found in Table 3.3.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+ \textbf{Contest ID} & \textbf{Minutes Since Start} & \textbf{Summed Entries} & \textbf{4 Hours Out} \\ 
+ \hline
+ 10486 & 0 & 0.006452 & 1 \\  
+ \hline
+ 10486 & 0.0125 & 0.009677 & 1 \\
+ \hline
+ 10486 & 0.015 & 0.01935 & 1 \\
+ \hline
+ \vdots & \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 0.475 & 0.1935 & 0 \\
+ \hline
+ \vdots & \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 1 & 1 & 0 \\
+ \hline
+\end{tabular}
+\caption{Scaled Converted Time Series Data}
+\end{center}
+\end{table}
+
+\subsection{Durations}
+
+The last cleaning step for time series data is get the duration of each contest. In subsequent sections, we explain the methods used to predict the model parameters for a given contest. However, in order to then forecast what the model value will be at the time the contest closes, we need to know the final value of ``Time Since Start''. To do this, we go through all contest ID's and get the max time value which is considered the ``Duration'' of the contest. The duration of the example contest from Tables 3.1 - 3.3 is 400 minutes. A csv with each contest ID and its associated duration was then created.
+
+\subsection{Exponential Model Fitting}
+
+We found the data tended to have the form of a noisy exponential. This can be seen in Figure 3.4. To keep the model simple, we opted to use an exponential model of the form $B_{0}e^{B_{1}}$. This was meant to capture the basic nature of entries growing more rapidly with time. We performed exponential fits in two ways: using a series of WLS's with varying values of $\lambda$ and using a series of KF's with varying values of Q.
+
+\subsection{Final Data Set Setup}
+
+
+
+\subsection{Classification Prediction}
+
+
+
+\subsection{Performance Evaluation}
+
+

@@ -1,1 +1,65 @@
 \section{Linear Regression}
+
+In a data set involving two variables, we can attempt to map a relation between them using linear regression. This technique can be used to model such a relation through its generation of a linear equation. In linear regression, one variable is considered to be the independent variable and the other the dependent variable. We typically denote the dependent, or response, variable as $Y$ and the independent, or explanatory, variable as $X$. Thus we can generate the linear equation
+
+\begin{equation}
+    Y=a+bX
+\end{equation}
+
+where a and b are real coefficients denoting the intercept and slope of the line, respectively. It is important to note that while a strong correlation may exist between X and Y (we will explain in detail what that means later), this does not necessarily imply that X causes Y or vice versa. \newline
+
+\susection{Least-Squares Regression}
+
+Most data in real world applications is discrete, or a countable number of points $N$, while a linear equation is a continuous approximation. How then do we generate such an equation given out data set?
+
+The Least-Squares Regression fits a continuous line to a discrete set of data by finding and minimizing the squared vertical distance between each data point and the line. This distance between the line and the observed data point is called the residual. A plot of the explanatory variable versus the residuals should have no discernible pattern. Otherwise, a linear model may not be the best fit for this data. In this case, a transformation from the original data to something more linear may be appropriate. For example, if the observed data is approximately exponential in nature, a log transformation would take the data from the log space to linear space, where a Least-Squares linear fit would be appropriate. \newline
+
+To generate the least squares line, we consider the following system of equations. In the following example, our explanatory variable is $t$, for time, and our response variable is $y$. We have $N$ discrete data points that are time/response pairs, and we are attempting to approximate $a$ and $b$, the coefficients of the best fit line. 
+
+\begin{equation}
+H
+=
+\begin{bmatrix}
+1 & 0 \\
+1 & 1 \\
+1 & 2 \\
+\vdots & \vdots \\
+1 & N-1 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+y
+=
+H
+\begin{bmatrix}
+a \\
+b
+\end{bmatrix}
+\end{equation}
+
+For each observation point, we have some relation between time and the response which we can estimate with these two equations. To estimate our final relationship, given by the coefficients $\^{a}$ and $\^{b}$. These coefficients are found with the following equation.
+
+\begin{equation}
+\begin{bmatrix}
+\^{a} \\
+\^{b}
+\end{bmatrix}
+=
+(H^{T}H)^{-1}H^{T}y
+\end{equation}
+
+\subsection{Extensions of Linear Regression}
+
+The variety of problems to which linear regression can be applied has created the need for various modifications to the technique. For example, there are some cases where certain points within a data set must be weighted more heavily than others. This cannot be done in a traditional least squares, but can be achieved through the introduction of an additional diagonal matrix $W$. For a matrix to be diagonal, it must only have entries along its main diagonal. This property allows  multiplication by $W$ to scale matrices by which it is multiplied. \newline
+
+Our new equation to estimate the coefficients of our best fit line would be
+
+\begin{equation}
+\begin{bmatrix}
+\^{a} \\
+\^{b}
+\end{bmatrix}
+=
+(H^{T}WH)^{-1}H^{T}Wy
+\end{equation}
