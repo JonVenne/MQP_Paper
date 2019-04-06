@@ -1,1 +1,210 @@
+\section{Exponential Model Fitting}
 
+We found the time data tended to have the form of a noisy exponential, as can be seen in Figures 2.5 - 2.7, since the cumulative sum of entries grows monotonically and most rapidly towards the end of each contest. To keep the model simple, we opted to use an exponential model of the form $\alpha e^{\beta t}$. This was meant to capture the basic nature of entries growing more rapidly with time. We made predictions with exponential fits in two ways: a series of Weighted Least Square (WLS) estimates (varying values of $\lambda$) and a series of Kalman Filter (KF) estimates (varying values of the $Q$ matrix).
+
+\subsection{Least Squares}
+For each contest, 15 WLS estimates were performed using the following set of 15 $\lambda$ values. These values were chosen to ensure a wide range of values were applied in the hope that more information could be drawn from them.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+ $\lambda$1 & 0.1 \\  
+ \hline
+ $\lambda$2 & 0.2 \\  
+ \hline
+ $\lambda$3 & 0.3 \\  
+ \hline
+ $\lambda$4 & 0.4 \\  
+ \hline
+ $\lambda$5 & 0.5 \\  
+ \hline
+ $\lambda$6 & 0.6 \\  
+ \hline
+ $\lambda$7 & 0.7 \\  
+ \hline
+ $\lambda$8 & 0.8 \\  
+ \hline
+ $\lambda$9 & 0.9 \\  
+ \hline
+ $\lambda$10 & 0.99 \\  
+ \hline
+ $\lambda$11 & 0.999 \\  
+ \hline
+ $\lambda$12 & 0.9999 \\  
+ \hline
+ $\lambda$13 & 0.99999 \\  
+ \hline
+ $\lambda$14 & 0.999999 \\  
+ \hline
+ $\lambda$15 & 0.9999999 \\  
+ \hline
+\end{tabular}
+\caption{The set of $\lambda$ values used in WLS to predict the parameters and final number of entries for each contest.}
+\end{center}
+\end{table}
+
+Starting with data of the form found in Table 3.3, we begin by excluding all data collected after the ``4 Hours Out'' point (i.e. we only used the data where ``4 Hours Out'' = 1). This allowed us to pretend as if we were analyzing a live contest 4 hours before it closed. We then changed the ``Summed Entries'' data by taking its natural log to convert it from pseudo exponential to pseudo linear. This made fitting with WLS possible as it can only be applied to linear functions. The result of this can be seen in Figures 2.5 and 2.6 with Figure 2.7 showing the original form of the data. The final adjusted data set for performing WLS on Table 3.3 can be seen in Table 3.5. Using this information, we could then create the design matrix ($H$), weighting matrix ($W$), and response matrix ($y$) as described in Section 2.6.1 and Equation 2.12. These matrices, as they apply to our example data set from Table 3.5, can be found in Equations 3.1 - 3.3.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+ \textbf{Contest ID} & \textbf{Minutes Since Start} & \textbf{ln(Summed Entries)} & \textbf{4 Hours Out} \\ 
+ \hline
+ 10486 & 0 & -0.43819 & 1 \\  
+ \hline
+ 10486 & 1.25 & -0.03283 & 1 \\
+ \hline
+ 10486 & 1.5 & 0.6601 & 1 \\
+ \hline
+ \vdots & \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 47.5 & 2.9627 & 0 \\
+ \hline
+ \vdots & \vdots & \vdots & \vdots \\
+ \hline
+ 10486 & 100 & 4.6052 & 0 \\
+ \hline
+\end{tabular}
+\caption{The same representative fake data set after taking the natural log of the ``Summed Entries'' column in order to put the data in a pseudo linear space.}
+\end{center}
+\end{table}
+
+\begin{equation}
+    H = \begin{bmatrix}
+        1 & 0 \\
+        1 & 1.25 \\
+        1 & 1.5 \\
+        \vdots & \vdots \\
+        1 & 47.5 \\
+        \vdots & \vdots \\
+        1 & 100 
+    \end{bmatrix}
+\end{equation}
+\begin{equation}
+    W = \begin{bmatrix}
+        \lambda^{100}\sim 0 & 0 & 0 & \cdots & 0 \\
+        0 & \lambda^{98.75}\sim 0 & 0 & \cdots & 0 \\
+        0 & 0 & \ddots & \ddots  & \vdots  \\
+        \vdots & \vdots & \ddots & \lambda^{0.25} =  & 0  \\
+        0 & 0 & \cdots & 0 & \lambda^{0} = 1 
+    \end{bmatrix}
+\end{equation}
+\begin{equation}
+    y = \begin{bmatrix}
+        -0.43819 \\ 
+        -0.03283 \\ 
+        0.6601 \\
+        \vdots \\ 
+        2.9627 \\
+        \vdots \\
+        4.6052
+    \end{bmatrix}
+\end{equation}
+
+It should be noted that while normal WLS requires constant interval data (i.e. $x_{i+1} - x_{i} = c$ where $x_{i+1}$ and $x_{i}$ are consecutive time entries and $c$ is some constant) our data tends to have sporadic intervals as values are only recorded at times when people enter the contest. To get around this, instead of the normal method for choosing powers of $\lambda$ described in Section 2.6.1, we calculated powers of lambda by subtracting the relevant time value from the maximum time value (which is always 100 after being scaled during preprocessing). Thus the i$^{th}$ entry of the diagonal matrix $W$ becomes
+
+\begin {equation}
+    W_{i} = \lambda^{100 - x_{i}}
+\end{equation}
+
+This effectively assigns the same powers of $\lambda$ as if the data were interpolated (were made to have constant intervals by filling in gaps with linear approximations based on the two surrounding points), without the need for interpolation. It also ensured that contests with thousands of entries did not cause massive exponents which can cause massively small values for bases less-than 1. (Even $0.8^{1000}$ is on the order of $10^{-97}$)
+
+Since the dimensions of $H$, $W$, and $y$ are dependent on the number of entries in a given contest, we wanted to avoid the computational load of having to generate 15 $W$ matrices in ${\rm I\!R}^{n \times n}$ where $n$ can be over 1000 for each contest. We instead created an augmented version of the $H^{T}$ matrix. As seen in Equation 2.12, $H^{T}$ is always right-multiplied by $W$ . Taking advantage of this, we opted to merge the powers of $\lambda$ directly into $H^{T}$. This then left us with three distinct matrices with $H$ and $y$ remaining the same and $H^{T}$ becoming $H_{W}^{T}$ where each column is multiplied by its respective power of $\lambda$. The WLS formulation then became
+
+\begin{equation}
+\begin{bmatrix}
+\hat{\alpha} \\
+\hat{\beta}
+\end{bmatrix}
+=
+(H_{W}^{T}H)^{-1}H_{W}^{T}y
+\end{equation}
+
+
+For our current example, $W$ and $H$ from equations 3.1 and 3.2 merge to form $H_{W}^{T}$ as seen in Equation 3.6.
+
+\begin{equation}
+H_{W}^{T} = \begin{bmatrix}
+        \lambda^{100} & \lambda^{98.75} & \lambda^{98.5} & \cdots & \lambda^{0} \\
+        0\lambda^{100} & 1.25\lambda^{98.75} & 1.5\lambda^{98.5} & \cdots & 100\lambda^{0}
+    \end{bmatrix}
+\end{equation}
+
+With this structure established, we simply then performed each of the 15 WLS parameter estimates outputting 15 pairs of $A$ and $B$ values. Since this estimate was done in log space, we then converted each set of parameters back to normal space. Our WLS predicted the optimal $A$ and $B$ for the line 
+
+\begin{equation}
+    ln(y) = \alpha + \beta x
+\end{equation}
+
+To convert this, we raise both sides to powers of $e$, thus
+
+\begin{equation}
+    y = e^{\alpha + \beta x}
+\end{equation}
+
+which is equivalent to 
+
+\begin{equation}
+    y = e^{\alpha}e^{\beta x}
+\end{equation}
+
+Here, $B$ doesn't change as it remains in the exponential. To transition back to normal space, we needed only to calculate a new $\alpha$; $\alpha' = e^{\alpha}$. We concatenated the $\alpha'$ and $\beta$ values generated from each value of $\lambda$ into a dataframe. In the event that no data exists beyond the ``4 Hours Out'' mark, we set the values of $\alpha'$ and $\beta$ to 0. The WLS can also output values \textit{nan} or \textit{inf} for ``not a number'' or ``infinity'' respectively in some cases. We deal with these later on.
+
+\subsection{Kalman Filter}
+Our application of the Extended Kalman Filter for non-linear parameter estimation follows much the same steps as the WLS implementation. Just like WLS, we ran each contest's time data using 15 different $Q$ matrices with $R = 1$ in all cases. 
+
+\begin{table}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+ \textbf{Label} & \textbf{$Q_{\alpha}$} & \textbf{$Q_{\beta}$} \\ 
+ \hline
+ v1 & 8000 & 60 \\  
+ \hline
+ v2 & 9000 & 60 \\
+ \hline
+ v3 & 100000000 & 10 \\
+ \hline
+ v4 & 10000000 & 100 \\
+ \hline
+ v5 & 1000000 & 100 \\
+ \hline
+ v6 & 10000000 & 10 \\
+ \hline
+ v7 & 1000 & 1000 \\
+ \hline
+ v8 & 1000000000 & 10 \\
+ \hline
+ v9 & 10000000000 & 10 \\
+ \hline
+ v10 & 100000000 & 32 \\
+ \hline
+ v11 & 3981072 & 16 \\
+ \hline
+ v12 & 208929613 & 13 \\
+ \hline
+ v13 & 794328234 & 251 \\
+ \hline
+ v14 & 60000 & 58000 \\
+ \hline
+ v15 & 2691534 & 1778 \\
+ \hline
+\end{tabular}
+\caption{The set of values on the main diagonal of the $Q$ matrix used in KF to predict the parameters and final number of entries for each contest. While we recognize these values may seem arbitrary, they were chosen with the explicit goal of providing a wide variety of predictions from which a machine learner may be able to derive trends.}
+\end{center}
+\end{table}
+
+These were chosen by performing an exhaustive search over values of $R$, $Q_{\alpha}$ and $Q_{\beta}$ on a set of 20 contests which included various sports, lengths, entry fees and total entries. $R$ ranged exponentially in the form $2^{N}$ with $N=(0,...,10)$ and $Q_{\alpha}$ and $Q_{\beta}$ each ranged exponentially in the form $10^{N}$ with $N=(0,...,10)$. Each set of $R_{i}$, $Q_{\alpha i}$ and $Q_{B\beta i}$ was evaluated by the sum of residuals using three weighting schemes: a flat weighting where all residuals are weighted equally, a linear weighting where more recent data is weighted linearly more than older data, and an exponential weighting where more recent data is weighted exponentially more than older data. From analyzing these results, we selected 15 that appeared to most often reduce the sum of errors. It should be noted that this method of selecting $Q$ values will not necessarily produce statistically ``proper'' $Q$'s. It was our intent to have Kalman Filters with a variety of $Q$ values, whose diversity could be instructive to a random forest. As long as a single Kalman Filter behaves consistently across contests, a Random Forest could theoretically use the noise in the prediction for its own predictive power.
+
+Since the Extended Kalman Filter is able to perform estimations on non-linear data, we did not need to convert to log space beforehand. In our example, this means the data from Table 3.3 will work as is. Once again, we filter out contests that were recorded less than four hours before the contest ends (we only use data where ``4 Hours Out'' = 1). In this case, the output $\alpha$ and $\beta$ values are already in normal space so no conversion is required. We concatenated the $\alpha$ and $\beta$ values generated from each value of $Q$ into a dataframe. In the event that no data exists beyond the ``4 Hours Out'' mark, we set the values of $\alpha'$ and $\beta$ to 0. The Kalman Filter can also output values \textit{nan} or \textit{inf} for ``not a number'' or ``infinity'' respectively in some cases. We deal with these later on.
+
+% \subsection{Forecasting}
+% With all the $A$ and $B$ values estimated using both WLS and EKF, we were then able to forecast the total number of entries at the close of each contest. Since all parameters are already in normal space, we could apply the same forecasting methodology to all parameters. Since we already determined the duration of all contests in Section 3.1.3, the final prediction can be calculated by
+
+\begin{equation}
+    \hat{y}_{final} = \alpha e^{\beta100}
+\end{equation}
+
+since the duration (or final recorded time) of all contests is 100 after scaling.

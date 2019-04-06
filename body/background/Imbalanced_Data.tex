@@ -1,1 +1,74 @@
 \section{Imbalanced Data}
+The proportion of occurrences belonging to each class in a dataset (Class distribution) plays a key role in classification in Machine Learning. An Imbalanced data problem refers to when a high priority class, (minority) infrequently appears in a dataset. This is due to another class instance (majority) outnumbering the minority class. This can lead to the evaluation criterion controlling the machine learning to treat minority class instances as noise, resulting in the loss of the classifier’s ability to classify any new minority class instances. Consider a dataset which has 1 minority class to 100 majority classes. A classifier that maximizes accuracy and ignores imbalance will obtain an accuracy of about 99 percent by only predicting the majority class outcome. This section will go into more detail on how this problem occurs and the solutions investigated for this paper.
+
+\subsection{Class Imbalance Problem} 
+This section’s purpose is to refresh the reader's knowledge of supervised classification, to detail the Class Imbalance Problem and finally introduce a metric for performance evaluation.
+
+% \subsubsection{Supervised Classification *this might be in random forest, if so remove}
+%In machine learning, the aim of classification is to learn/create a system capable of predicting an unknown output class of a new data instance [2]. This is done using a set number of input instances characterized by a set number of features  to predict a class output label. In our case the features are known before the learning stage. This is called supervised learning. A classifier is created from the mapping function that is defined by the pattern of features by the learning algorithm.
+
+\subsubsection{Problem of Imbalanced Datasets}
+As stated, a dataset is said to be imbalanced when a minority class is underrepresented. When this occurs, standard classifiers tend to predict majority class for maximum accuracy. This is know as the class imbalance problem. However, the issue is more complicated than this. If a dataset is not skewed, meaning the dataset has significant set regions where only one class occurs, the class imbalance problem will not occur no matter how high the imbalanced ratio is. When a skewed data distribution does occurs, the problems of small sample size, overlapping and small disjuncts appear or are more relevant for minority class prediction. These problems collectively result in the class imbalance problem.
+\begin{itemize}
+    \item Overlapping is when data samples belonging to different classes occupy the same space, making it difficulty to effectively distinguishing between different classes [7].
+    \item Too small sample size: Often the ratio between majority and minority class is so high that it can prove extremely difficult to record any minority class examples at all. Undersampling with these few instances can result in overfitting (see Undersampling and Overfitting in solutions section). In addition to overfitting, the bigger the imbalance ratio is, the stronger the bias to the majority class.
+    \item Small Disjuncts occur when the minority class instances are distributed in two or more feature spaces. This makes it harder to “pin down” where minority class instances are likely to occur.
+    \item It is these issues in addition to skewed data distributions that cause the imbalanced data problem. %you never define what the imbalanced data problem is Sean here: I say delete this sentence.
+    %you also say "class imbalance problem" early. Be consistent
+\end{itemize}
+
+\subsubsection{Performance Evaluation}
+Traditionally, accuracy has been the metric for determining machine learning prediction efficiency. But, as stated before, accuracy is not the best metric when dealing with Imbalanced data, as it may lead to removing minority class instances as noise. When working in imbalanced datasets, there exist better metrics to evaluate performance. The most common solution is to use a confusion matrix to measure the true positive rate, true negative rate, false positive rate, and false negative rate. 
+\begin{itemize}
+    \item True positive(minority) rate is the percentage of minority class correctly classified
+    \subitem TPrate = True Positives / (True Positives + False Negatives)
+    \item True negative(majority) rate is the percentage of majority class correctly classified 
+    \subitem TNrate = True Negative / (False Positives + True Negatives)
+    \item False positive rate is the percentage of negative instances misclassified
+    \subitem FPrate = False Positive / (False Positives + True Negatives)
+    \item False negative rate is the percentage of positive instances misclassified
+    \subitem FNrate = False Negative/(True Positives + False Negatives)
+\end{itemize}
+%this entire list could use a touch up
+The machine learning classification goal is to achieve good true positive rates and true negative rates. A common way of combining these results is through the use of a receiver operating characteristic(ROC) curve. ROC curves serve as a metric of a classifier's ability to discern between classes. This allows for a visual representation of the trade-off between true positive and false positive rates. The area under a ROC is equivalent to the probability of correctly identifying a class.
+%include a reference image of an actual ROC curve (or even several of varying quality) and explain which is better and why.
+
+\subsection{Solutions to the Class Imbalance Problem}
+Class imbalance has emerged as one of the challenges in the data science community [6]. Many real world classification problems attempt to classify infrequent instances such as fraud detection, medical diagnoses, and detection of oil spills. Many techniques have been proposed to solve imbalanced data problems, the majority of which fall into 3 groups: Data level, Algorithm level and Cost Sensitive learning.
+%you shouldn't explain all three groups here. Instead immediately discuss each in a subsubsection as you do below Sean Here, we need citations for the examples and I agree with this point and am making the change.
+Data level solutions rebalance the class distribution by resampling the data space [7]. This solution avoids affecting the learning algorithm by decreasing the imbalanced ratio with a preprocessing step. This makes data level solutions extremely versatile as they are independent type of classifier used.
+
+Algorithm level solutions adapt/rewrite the existing classifier learning algorithm to increase bias towards predicting the minority class[8]. Implementing these adaptations can be difficult and require a good knowledge of the imbalanced data problems discussed in the previous section.
+
+Cost Sensitive learning solutions is a hybrid of the previous two. It associates costs to instances and modifies the learning algorithm to accept costs. The cost of misclassified a minority class is higher than a majority class. This biases the classifier to the minority class as it seeks to minimize total cost errors. The flaw to this method is that it is difficult define exactly what these cost associations values should exactly be.
+
+\subsubsection{Data-Level Techniques}
+Data level (Preprocessing) techniques are the most commonly use for solving imbalanced data problems. Data level solutions rebalance the class distribution by resampling the data space [7]. This solution avoids affecting the learning algorithm by decreasing the imbalanced ratio with a preprocessing step. This makes data level solutions extremely versatile as they are independent type of classifier used. The three preprocessing techniques considered for this project were Oversampling, Undersampling, and Hybrid Sampling.
+%are there 4 techniques or just the 3 listed here?
+
+\subsubsection{Oversampling}
+Oversampling refers to any algorithm that rebalances a dataset by synthetically creating new minority class data. According to Learning from class-imbalanced data: Review of methods and applications, Oversampling
+%no need to drop the text title here, just cite it
+is best paired with problems that have less data. Two often used Oversampling algorithms are Synthetic Minority Oversampling Technique (SMOTE) and random data duplication. See Appendix A for a visual example of SMOTE.
+%no, put the visual example right here in the background, not need for it to be in an appendix
+Data duplication simply duplicated the data points to increase the occurrence of the minority class. SMOTE is most effective for increasing the number of samples for clustered minority classes where Data duplication is much less biased.
+%you never explain what smote is. You talk about data duplication, but smote doesn't just duplicate it creates new points entirely Sean here, Smote is explain in that appendix i mentioned. I found it very difficult to explain properly without several visual aids, which made the section extremely long for a tool we don't even use.
+
+\subsubsection{Undersampling}
+Undersampling is any algorithm that rebalances a dataset by removing majority class data points. This method is best for large amounts of data were data retention is less critical. The two most often used Undersampling algorithms are K-means clustering and Random Undersampling. See Appendix B for a visual example of K-means
+%again, no. Put it here. Sean here, same deal as above.
+clustering. Random Undersampling selects random majority class data points to remove.Similarly to the SMOTE and data duplication, K-means is best for clustered majority class data while random undersampling is best for extremely skewed data.
+%this reads like a series of facts, not an elaborated thought/explanation
+
+\subsubsection{Hybrid Sampling}
+Hybrid sampling is the use of both Oversampling and Undersampling techniques to rebalance the dataset. The use of both oversampling and undersampling is selected normally over just undersampling in order to prevent the loss of large amounts of majority class data with little additional work to implement. To put this into context, lets take a example of data set with 100 points and an imbalance ratio of 99 to 1. We can undersample this data to have an imbalance ratio of 10 to 1. This is results in most of the majority class data being lost. Instead we can both Oversample and Undersample by duplication of the same minority class.
+%should explain how this can be done 
+
+%if we don't actually do either of these, then they sholdn't be here, Sean Here, we did research them tho. IDK a discuss what belongs in the paper is definitely something we should discuss.
+%\subsection{Algorithm techniques}
+%Algorithm techniques are often used in conjunction with preprocessing for increased minority class detection. The only the AdaBoosting algorithm was considered for this project.
+
+%\subsubsection{AdaBoosting}
+	
+%\subsection{Cost Sensitive learning}
+%Cost sensitive learning refers to an technique used to associate costs of missing a minority class samples with respect to majority class samples. Most cost sensitive approaches are difficult to implement effectively. The weight cost of misclassifying a minority result is often unknown. As of 1/28/19 no cost sensitive learning techniques have been used in this project.

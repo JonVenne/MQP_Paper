@@ -1,1 +1,263 @@
+\section{Final Data Set Setup}
 
+At this stage, we preprocess the header data into a more usable format. We also bring together all the data we've calculated so far and conglomerate it into our single final data set.
+
+We start by removing unusable / irrelevant columns. Features such as ``Contest Name'' were full of incomparable Strings which would be unlikely to hold predictive power. Time parameters also were not relevant to users and were determined to also be unusable for the purposes of prediction. 
+
+In addition to removing ineffective features, we also removed features that would allow the predictor to ``cheat'' (i.e. use information that could not be known before the end of a contest). Features like final number of entries were removed to ensure the predictions were made using fair and viable data. In total, we removed the following set of features.
+
+Include FEATURES HERE
+
+
+Next we standardized all numerical value columns. Features such as ``Entry Fee'' and ``Total Prize'' can take any positive value so we divide each numerical column by its respective maximum value to put them in the range of 0 to 1. We also had to translate the categorical columns into a format a Random Forest could handle. We chose to create a column for every categorical value.  Each contest has a 1 in the columns of the categories it fit in and 0 in the rest.  This sort of splitting is known as 1-hot encoding and is extremely helpful in instances where Strings cannot be interpreted.
+
+We found that 2 sets of ``Sport Name'' needed to be merged. ``SOCC'' and ``SOC'' both represent soccer contests, the naming code was simply changed at one point. ``PGA'' and ``GOLF'' were also both present in data. Cases such as these with equivalent categories were merged into singular respective columns.
+
+We next created our ``Success'' column. It was necessary to have an easy-to-access metric for whether a given contest met its goal. DraftKings informed us that they measure a contests' success as whether the number of entries matched the player limit. In accordance, we created a new Boolean ``Success'' feature measuring whether the total number of entries equalled the max number of players allowed.
+
+The last step in processing data was to determine predictions based on both the Weighted Least Squares' and Kalman Filter's results. Both algorithms were set up to return an $A$ and $B$ value from our model $Ae^{Bx}$. Since all of our time series data was scaled 0-to-100 on both axes, predictions are simply calculated as $Ae^{B \times 100}$. This computation was performed on all 15 versions of both the WLS and KF.
+
+We combining each of the above-mentioned processes   in our final dataframe. The final set of features included the standardized numerical features, 1-hot encoded features, ``Success'' column, and the $A$ and $B$ parameters of each WLS and KF with their associated percent-full predictions.
+
+% Success
+% EntryFeeAmount_Scaled
+% TotalPrizeAmount_Scaled
+% MaxNumberPlayers_Scaled
+% MaxEntriesPerUser_Scaled
+% DistinctUsers_Scaled
+% NumGames_Scaled
+% DraftablePlayersInSet_Scaled
+% PaidUsersInDraftGroup_Scaled
+% TopPrize_Scaled
+% MaxPayoutPosition_Scaled
+% Duration_Scaled
+% SportName_NAS
+% SportName_CFB
+% SportName_MLB
+% SportName_NFL
+% SportName_SOCC
+% SportName_GOLF
+% SportName_MMA
+% SportName_LOL
+% SportName_NHL
+% SportName_NBA
+% SportName_CBB
+% SportName_CFL
+% SportName_EL
+% SportName_TEN
+% VariantName_Classic
+% VariantName_Classic (Old)
+% VariantName_Non Late Swap
+% VariantName_11 Man
+% VariantName_Weekend
+% VariantName_Arcade
+% VariantName_WNBA
+% VariantName_Tiers
+% VariantName_Playoff Arcade
+% VariantName_Tiers Non Late Swap
+% VariantName_Final Series
+% VariantName_Showdown
+% VariantName_Match Play
+% VariantName_Showdown Captain Mode
+% VariantName_Lowball
+% VariantName_Single Match
+% VariantName_Tiers: Man of the Match
+% VariantName_Tiers: Playmakers
+% VariantName_Tiers: Draft Pick
+% VariantName_Tiers: College Conference
+% VariantName_In-Game Showdown (H2)
+% VariantName_In-Game Showdown (Q4)
+% Contest_Group_Headliner
+% Contest_Group_Satellite
+% Contest_Group_SingleEntry
+% Contest_Group_FeaturedDoubleUp
+% Contest_Group_Qualifier
+% Contest_Group_50/50
+% Contest_Group_MultiPlayer
+% Contest_Group_H2H
+% Contest_Group_DoubleUp
+% Contest_Group_Booster
+% Contest_Group_LiveEvent
+% Contest_Group_3Max
+% Contest_Group_Multiplier
+% Contest_Group_DFSLeagues
+% A_KF_v11
+% A_KF_v12
+% A_KF_v13
+% A_KF_v14
+% A_KF_v15
+% B_KF_v11
+% B_KF_v12
+% B_KF_v13
+% B_KF_v14
+% B_KF_v15
+% A_KF_v1
+% A_KF_v10
+% A_KF_v2
+% A_KF_v3
+% A_KF_v4
+% A_KF_v5
+% A_KF_v6
+% A_KF_v7
+% A_KF_v8
+% A_KF_v9
+% B_KF_v1
+% B_KF_v10
+% B_KF_v2
+% B_KF_v3
+% B_KF_v4
+% B_KF_v5
+% B_KF_v6
+% B_KF_v7
+% B_KF_v8
+% B_KF_v9
+% Pred_KF_v11
+% Pred_KF_v12
+% Pred_KF_v13
+% Pred_KF_v14
+% Pred_KF_v15
+% Pred_KF_v1
+% Pred_KF_v10
+% Pred_KF_v2
+% Pred_KF_v3
+% Pred_KF_v4
+% Pred_KF_v5
+% Pred_KF_v6
+% Pred_KF_v7
+% Pred_KF_v8
+% Pred_KF_v9
+% A_LR_f10
+% B_LR_f10
+% A_LR_f11
+% B_LR_f11
+% A_LR_f12
+% B_LR_f12
+% A_LR_f13
+% B_LR_f13
+% A_LR_f14
+% B_LR_f14
+% A_LR_f15
+% B_LR_f15
+% A_LR_f1
+% B_LR_f1
+% A_LR_f2
+% B_LR_f2
+% A_LR_f3
+% B_LR_f3
+% A_LR_f4
+% B_LR_f4
+% A_LR_f5
+% B_LR_f5
+% A_LR_f6
+% B_LR_f6
+% A_LR_f7
+% B_LR_f7
+% A_LR_f8
+% B_LR_f8
+% A_LR_f9
+% B_LR_f9
+% Pred_LR_f10
+% Pred_LR_f11
+% Pred_LR_f12
+% Pred_LR_f13
+% Pred_LR_f14
+% Pred_LR_f15
+% Pred_LR_f1
+% Pred_LR_f2
+% Pred_LR_f3
+% Pred_LR_f4
+% Pred_LR_f5
+% Pred_LR_f6
+% Pred_LR_f7
+% Pred_LR_f8
+% Pred_LR_f9
+% A_KFS_v1
+% A_KFS_v10
+% A_KFS_v11
+% A_KFS_v12
+% A_KFS_v13
+% A_KFS_v14
+% A_KFS_v15
+% A_KFS_v2
+% A_KFS_v3
+% A_KFS_v4
+% A_KFS_v5
+% A_KFS_v6
+% A_KFS_v7
+% A_KFS_v8
+% A_KFS_v9
+% B_KFS_v1
+% B_KFS_v10
+% B_KFS_v11
+% B_KFS_v12
+% B_KFS_v13
+% B_KFS_v14
+% B_KFS_v15
+% B_KFS_v2
+% B_KFS_v3
+% B_KFS_v4
+% B_KFS_v5
+% B_KFS_v6
+% B_KFS_v7
+% B_KFS_v8
+% B_KFS_v9
+% Pred_KFS_v1
+% Pred_KFS_v10
+% Pred_KFS_v11
+% Pred_KFS_v12
+% Pred_KFS_v13
+% Pred_KFS_v14
+% Pred_KFS_v15
+% Pred_KFS_v2
+% Pred_KFS_v3
+% Pred_KFS_v4
+% Pred_KFS_v5
+% Pred_KFS_v6
+% Pred_KFS_v7
+% Pred_KFS_v8
+% Pred_KFS_v9
+% A_LRS_f10
+% B_LRS_f10
+% A_LRS_f11
+% B_LRS_f11
+% A_LRS_f12
+% B_LRS_f12
+% A_LRS_f13
+% B_LRS_f13
+% A_LRS_f14
+% B_LRS_f14
+% A_LRS_f15
+% B_LRS_f15
+% A_LRS_f1
+% B_LRS_f1
+% A_LRS_f2
+% B_LRS_f2
+% A_LRS_f3
+% B_LRS_f3
+% A_LRS_f4
+% B_LRS_f4
+% A_LRS_f5
+% B_LRS_f5
+% A_LRS_f6
+% B_LRS_f6
+% A_LRS_f7
+% B_LRS_f7
+% A_LRS_f8
+% B_LRS_f8
+% A_LRS_f9
+% B_LRS_f9
+% Pred_LRS_f10
+% Pred_LRS_f11
+% Pred_LRS_f12
+% Pred_LRS_f13
+% Pred_LRS_f14
+% Pred_LRS_f15
+% Pred_LRS_f1
+% Pred_LRS_f2
+% Pred_LRS_f3
+% Pred_LRS_f4
+% Pred_LRS_f5
+% Pred_LRS_f6
+% Pred_LRS_f7
+% Pred_LRS_f8
+% Pred_LRS_f9
