@@ -57,7 +57,7 @@ The Header Data in our set consists of all the label information for each of the
     MaxPayoutPosition & Integer & value of the index of the winning user in that contest, not particularly pertinent to our analysis \\
     \hline
 \end{tabular}
-\caption{Summary of the provided Header Data including names, data types, and brief descriptions of all 21 included features.}
+\caption[Header Data Column Descriptions]{Summary of the provided Header Data including names, data types, and brief descriptions of all 21 included features.}
 \label{tab:headercols}
 \end{table}
 
@@ -69,7 +69,7 @@ Histograms of some of the Header Data columns can be found in the Figures \ref{f
 \begin{figure}
 \centering
 \includegraphics[width=8cm]{body/background/SportName.png}
-\caption{A histogram of the number of contests for each SportName sorted in descending order. Approximately 80\% of all contests are of the type NBA, MLB, NFL, or NHL which stand for basketball, baseball, football and hockey respectively.}
+\caption[SportName Histogram]{A histogram of the number of contests for each SportName sorted in descending order. Approximately 80\% of all contests are of the type NBA, MLB, NFL, or NHL which stand for basketball, baseball, football and hockey respectively.}
 \label{fig:sportname}
 \end{figure}
 %we should describe the codes in the appendix
@@ -79,7 +79,7 @@ A typical \textbf{ContestName} might be \textit{CFB 1K Blitz 1,000 Guaranteed}, 
 \begin{figure}
 \centering
 \includegraphics[width=8cm]{body/background/ContestGroup.png}
-\caption{A histogram of the number of contests for each ContestGroup sorted in descending order. Approximately 94\% of all contests are of the type Headliner, Satellite, SingleEntry, or FeaturedDoubleUp.}
+\caption[ContestGroup Histogram]{A histogram of the number of contests for each ContestGroup sorted in descending order. Approximately 94\% of all contests are of the type Headliner, Satellite, SingleEntry, or FeaturedDoubleUp.}
 \label{fig:contestgroup}
 \end{figure}
 %we should describe the groups in the appendix
@@ -122,7 +122,7 @@ Using the time series data, we can sum the entries in every interval to identify
 \vdots & \vdots & \vdots \\
 \hline
 \end{tabular}
-\caption{This is an example of the form the times series data was originally provided in. Each included columns for unique contest ID, minutes until the contest closed, and the number of entries received in the last minute. Data only appears if users entered the contest within the last minute, so gaps in ``Minutes Remaining in Contest'' can appear if no new entries were made that minute. Additionally, each file contained multiple thousands of unique contests (this fake set shows only two, but would surely have thousands more).}
+\caption[Raw Time Series Data Example]{This is an example of the form the times series data was originally provided in. Each included columns for unique contest ID, minutes until the contest closed, and the number of entries received in the last minute. Data only appears if users entered the contest within the last minute, so gaps in ``Minutes Remaining in Contest'' can appear if no new entries were made that minute. Additionally, each file contained multiple thousands of unique contests (this fake set shows only two, but would surely have thousands more).}
 \label{tab:series}
 \end{table}
 
