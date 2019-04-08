@@ -44,7 +44,7 @@ The original time series data format had columns for ``Minutes Remaining'' (minu
  10486 & 0 & 4 \\
  \hline
 \end{tabular}
-\caption{A representative set of fake time series data as it would have appeared in the originally provided file. Note this reflects only a single contest while the actual files included one full months worth of contests.}
+\caption[Sample Time Series Data as Received]{A representative set of fake time series data as it would have appeared in the originally provided file. Note this reflects only a single contest while the actual files included one full months worth of contests.}
 \end{center}
 \end{table}
 
@@ -73,7 +73,7 @@ Altogether, the structure for each contest is changed from what's seen in Table 
  10486 & 400 & 310 & 0 \\
  \hline
 \end{tabular}
-\caption{This is the same representative set of fake data after processing ``Minutes Remaining'' into ``Minutes Since Start'' by subtracting the ``Minutes Remaining'' value from the maximum ``Minutes Remaining'' value. ``Entries in Last Minute'' was also transformed into ``Summed Entries'' by taking a cumulative sum of entry values. A fourth ``4 Hours Out'' boolean column was added with value 1 if ``Minutes Remaining'' was $\geq$ 240 and 0 otherwise.}
+\caption[Basic Transformation of Time Series Data]{This is the same representative set of fake data after processing ``Minutes Remaining'' into ``Minutes Since Start'' by subtracting the ``Minutes Remaining'' value from the maximum ``Minutes Remaining'' value. ``Entries in Last Minute'' was also transformed into ``Summed Entries'' by taking a cumulative sum of entry values. A fourth ``4 Hours Out'' boolean column was added with value 1 if ``Minutes Remaining'' was $\geq$ 240 and 0 otherwise.}
 \end{center}
 \end{table}
 
@@ -100,7 +100,7 @@ We also go through each contest and scale ``Minutes Since Start'' and ``Summed E
  10486 & 100 & 100 & 0 \\
  \hline
 \end{tabular}
-\caption{This is the same representative fake data set after scaling both ``Minute Since Start'' and ``Summed Entries'' to 100 in order to standardize the range of values in each column.}
+\caption[Time Series Data with Summed Entries]{This is the same representative fake data set after scaling both ``Minute Since Start'' and ``Summed Entries'' to 100 in order to standardize the range of values in each column.}
 \end{center}
 \end{table}
 
