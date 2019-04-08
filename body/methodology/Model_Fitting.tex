@@ -40,7 +40,7 @@ For each contest, 15 WLS estimates were performed using the following set of 15 
  $\lambda$15 & 0.9999999 \\  
  \hline
 \end{tabular}
-\caption{The set of $\lambda$ values used in WLS to predict the parameters and final number of entries for each contest.}
+\caption[Least Squares Parameters Utilized]{The set of $\lambda$ values used in WLS to predict the parameters and final number of entries for each contest.}
 \end{center}
 \end{table}
 
@@ -67,7 +67,7 @@ Starting with data of the form found in Table 3.3, we begin by excluding all dat
  10486 & 100 & 4.6052 & 0 \\
  \hline
 \end{tabular}
-\caption{The same representative fake data set after taking the natural log of the ``Summed Entries'' column in order to put the data in a pseudo linear space.}
+\caption[Sample Data After a Log Transformation]{The same representative fake data set after taking the natural log of the ``Summed Entries'' column in order to put the data in a pseudo linear space.}
 \end{center}
 \end{table}
 
@@ -192,7 +192,7 @@ Our application of the Extended Kalman Filter for non-linear parameter estimatio
  v15 & 2691534 & 1778 \\
  \hline
 \end{tabular}
-\caption{The set of values on the main diagonal of the $Q$ matrix used in KF to predict the parameters and final number of entries for each contest. While we recognize these values may seem arbitrary, they were chosen with the explicit goal of providing a wide variety of predictions from which a machine learner may be able to derive trends.}
+\caption[Kalman Filter Parameters Utilized]{The set of values on the main diagonal of the $Q$ matrix used in KF to predict the parameters and final number of entries for each contest. While we recognize these values may seem arbitrary, they were chosen with the explicit goal of providing a wide variety of predictions from which a machine learner may be able to derive trends.}
 \end{center}
 \end{table}
 

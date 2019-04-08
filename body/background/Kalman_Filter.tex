@@ -34,7 +34,7 @@ Normally, the Kalman Filter is used to smooth out noise while maintaining the ge
 \begin{figure}[h]
 \centering
 \includegraphics{body/methodology/q2_kalman.jpg}
-\caption{Example showing how the Kalman Filter is capable of taking in a set of noisy data (blue) and derives a smoothed estimate (red) that is generally accurate to the true function (black).}
+\caption[Kalman Filter Graphic Example]{Example showing how the Kalman Filter is capable of taking in a set of noisy data (blue) and derives a smoothed estimate (red) that is generally accurate to the true function (black).}
 \label{fig:kfexamp}
 \end{figure}
 
@@ -177,7 +177,7 @@ Figure \ref{fig:kflsfit} shows an example of a line whose parameters were found 
 \centering
 \includegraphics[width=8cm]{body/methodology/KF_Q0.png}
 \includegraphics[width=8cm]{body/methodology/LS_pred.png}
-\caption{The left image shows a linear regression performed on a real contest using the Kalman Filter with a $Q$ of all 0's. The right image shows a linear regression found using a weighted least squares fit on the same contest with $\lambda$ = 1. This is the case of no forgetting factor for both methods which can be seen to produce what looks like the same approximating function.}
+\caption[Comparison of Least Squares and Kalman Filter Models]{The left image shows a linear regression performed on a real contest using the Kalman Filter with a $Q$ of all 0's. The right image shows a linear regression found using a weighted least squares fit on the same contest with $\lambda$ = 1. This is the case of no forgetting factor for both methods which can be seen to produce what looks like the same approximating function.}
 \label{fig:kflsfit}
 \end{figure}
 
@@ -186,7 +186,7 @@ Performing the fit by KF can be convenient for time series data as each iteratio
 \begin{figure}[h]
 \centering
 \includegraphics[width=10cm]{body/methodology/KF_Q3.png}
-\caption{This is the same contest from Figure \ref{fig:kflsfit} except $Q_{\alpha}$ = 0.3. We can see that even a small change in the Q matrix produces a significantly different fitting function.}
+\caption[Modified Q Parameter Kalman Filter]{This is the same contest from Figure \ref{fig:kflsfit} except $Q_{\alpha}$ = 0.3. We can see that even a small change in the Q matrix produces a significantly different fitting function.}
 \label{fig:q03fit}
 \end{figure}
 
@@ -214,6 +214,6 @@ Otherwise the calculations are exactly the same as for the ordinary KF. Figure \
 \centering
 \includegraphics[width=8cm]{body/methodology/KF_True0.png}
 \includegraphics[width=8cm]{body/methodology/KF_True10.png}
-\caption{This is the same contest from Figure \ref{fig:kflsfit} with $R = 30$ fpr both. The left image is an exponential function found using a $Q$ of all 0's. The right image shows the expoential function found when $Q_{\alpha} = Q_{\beta} = 10$. Again, we can see how changing the $Q$ matrix produces a significantly different fitting function.}
+\caption[Additional Varied Parameter Kalman Filters]{This is the same contest from Figure \ref{fig:kflsfit} with $R = 30$ for both. The left image is an exponential function found using a $Q$ of all 0's. The right image shows the exponential function found when $Q_{\alpha} = Q_{\beta} = 10$. Again, we can see how changing the $Q$ matrix produces a significantly different fitting function.}
 \label{fig:ekfexamp}
 \end{figure}
